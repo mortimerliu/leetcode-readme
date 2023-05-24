@@ -3,10 +3,11 @@ from __future__ import annotations
 import argparse
 import os
 import re
-from typing import Dict, List
-from typing import Sequence
-from subprocess import check_output, CalledProcessError
 from functools import lru_cache
+from subprocess import CalledProcessError
+from subprocess import check_output
+from typing import Iterator
+from typing import Sequence
 
 LEETCODE_URL: str = "https://leetcode.com/problems/{question}/description/"
 GITHUB_URL: str = "https://github.com/mortimerliu/LeetCode/blob/main/algorithms/{lang}/{level}/{filename}"
@@ -44,27 +45,27 @@ class Question:
         self.name = _extract_question_name(file)
         self.lc_name = _name_to_lc_name(self.name)
         self.level = level or _extract_question_level(file)
-        self.lang: List[str] = []
+        self.lang: list[str] = []
         self.leetcode_url = LEETCODE_URL.format(question=self.lc_name)
 
     def __hash__(self) -> int:
         return hash(self.id)
 
 
-def list_dirs(dir: str | os.DirEntry):
+def list_dirs(dir: str | os.DirEntry) -> Iterator[os.DirEntry]:
     for entry in os.scandir(dir):
         if entry.is_dir():
             yield entry
 
 
-def list_files(dir: str | os.DirEntry):
+def list_files(dir: str | os.DirEntry) -> Iterator[os.DirEntry]:
     for entry in os.scandir(dir):
         if entry.is_file():
             yield entry
 
 
-def list_questions(target_dir: str) -> List[Question]:
-    questions: Dict[int, Question] = {}
+def list_questions(target_dir: str) -> list[Question]:
+    questions: dict[int, Question] = {}
     for lang in list_dirs(target_dir):
         for level in list_dirs(lang):
             for file in list_files(level):
@@ -79,12 +80,17 @@ def list_questions(target_dir: str) -> List[Question]:
 
 
 def _name_to_lc_name(name: str) -> str:
-    return "-".join([seg.lower() for seg in re.findall("[0-9A-Z]+[^A-Z]*", name)])
+    return "-".join(
+        [seg.lower() for seg in re.findall("[0-9A-Z]+[^A-Z]*", name)],
+    )
 
 
 def _extract_question_level(filepath: str | os.DirEntry) -> str:
     filepath = filepath.path if isinstance(filepath, os.DirEntry) else filepath
-    match = re.search(r".+/(easy|medium|hard)/\d+\.[0-9a-zA-Z]+\.[a-z]+", filepath)
+    match = re.search(
+        r".+/(easy|medium|hard)/\d+\.[0-9a-zA-Z]+\.[a-z]+",
+        filepath,
+    )
     if match:
         return match.group(1)
     raise ValueError(f"Invalid filepath: {filepath}")
@@ -106,14 +112,16 @@ def _extract_question_name(filename: str | os.DirEntry) -> str:
     raise ValueError(f"Invalid filename: {filename}")
 
 
-def build_readme(questions: List[Question]) -> str:
+def build_readme(questions: list[Question]) -> str:
     table = []
     for question in questions:
         row = f"| {question.id} | [{question.name}]({question.leetcode_url}) |"
         ans = []
         for lang in sorted(question.lang):
             lang_url = GITHUB_URL.format(
-                lang=lang, level=question.level, filename=question.filename
+                lang=lang,
+                level=question.level,
+                filename=question.filename,
             )
             ans.append(f"[{lang}]({lang_url})")
         row += ", ".join(ans) + f" | {question.level} |\n"
@@ -132,7 +140,7 @@ def root():
     try:
         base = check_output("git rev-parse --show-toplevel", shell=True)
     except CalledProcessError:
-        raise IOError("Current working directory is not a git repository")
+        raise OSError("Current working directory is not a git repository")
     return base.decode("utf-8").strip()
 
 

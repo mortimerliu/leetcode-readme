@@ -1,6 +1,6 @@
 # leetcode-readme
 
-A tool (and `pre-commit` hook) to automatically (re-)generate README.md 
+A tool (and `pre-commit` hook) to automatically (re-)generate README.md
 for the [LeetCode](https://github.com/mortimerliu/LeetCode) here.
 
 ## Installation
@@ -21,4 +21,3 @@ Sample `.pre-commit-config.yaml`:
     hooks:
     -   id: leetcode-readme
 ```
-
