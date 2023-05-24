@@ -1,0 +1,6 @@
+- id: leetcode-readme
+  name: leetcode-readme
+  description: Auto-generate README.md for [LeetCode](https://github.com/mortimerliu/LeetCode)
+  entry: leetcode_readme
+  language: python
+  types: [python]
