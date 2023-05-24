@@ -129,6 +129,12 @@ def build_readme(questions: list[Question]) -> str:
     return README_TEMPLATE.format(table="".join(table))
 
 
+def read_readme(readme: str) -> str:
+    with open(readme) as f:
+        lines = f.readlines()
+    return "".join(lines)
+
+
 def write_readme(content: str, readme: str):
     with open(readme, "w") as f:
         f.write(content)
@@ -150,8 +156,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     add("filenames", nargs="*", help="Filenames to check.")
     _ = parser.parse_args(argv)
 
-    questions = list_questions(os.path.join(root(), "algorithms"))
-    write_readme(build_readme(questions), os.path.join(root(), "README.md"))
+    target_dir = os.path.join(root(), "algorithms")
+    readme_file = os.path.join(root(), "README.md")
+    questions = list_questions(target_dir)
+    content = build_readme(questions)
+    if content == read_readme(readme_file):
+        print("README.md is up-to-date")
+        return 0
+    write_readme(content, readme_file)
     return 1
 
 
