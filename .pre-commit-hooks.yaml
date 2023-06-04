@@ -4,3 +4,9 @@
   entry: leetcode-readme
   language: python
   types: [python]
+- id: cleanup-files
+  name: cleanup-files
+  description: Clean up old md files
+  entry: cleanup-files
+  language: python
+  types: [python]
