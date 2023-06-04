@@ -6,7 +6,9 @@ import re
 from pathlib import Path
 from subprocess import CalledProcessError
 from subprocess import check_output
+from typing import Any
 from typing import Callable
+from typing import Optional
 
 DROPBOX = Path.home().joinpath("Dropbox/LeetCode/")
 LEETCODE = Path.home().joinpath("src/leetcode/")
@@ -16,38 +18,35 @@ LC_REGEX = re.compile(r"(\d+)\.?(.*)\.([a-z]+)$")
 
 
 class Filter:
-    def __init__(self, func: Callable):
+    def __init__(self, func: Callable[[Path], bool]):
         self.func = func
 
     def __call__(self, files: list[Path]) -> list[Path]:
         return [file for file in files if self.func(file)]
 
-    def __and__(self, other: Filter):
+    def __and__(self, other: Filter) -> Filter:
         return Filter(lambda file: self.func(file) and self.func(file))
 
-    def __or__(self, other: Filter):
+    def __or__(self, other: Filter) -> Filter:
         return Filter(lambda file: self.func(file) or self.func(file))
 
-    def __invert__(self):
-        return Filter(lambda file: ~self.func(file))
+    def __invert__(self) -> Filter:
+        return Filter(lambda file: not self.func(file))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Filter({self.func})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return repr(self)
 
-    def __eq__(self, other):
-        return self.func == other.func
-
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.func)
 
 
 def list_files(
     path: Path,
-    filters: list[Callable] = None,
-    sort_key: Callable = None,
+    filters: list[Filter] | None = None,
+    sort_key: Callable[[Path], int] | None = None,
 ) -> list[Path]:
     all_files = [
         Path(dir).joinpath(file)
@@ -70,7 +69,9 @@ def get_question_id(file: Path) -> int:
 
 
 def get_to_be_removed_files() -> list[Path]:
-    lc_question_filter = Filter(lambda file: LC_REGEX.match(file.name))
+    lc_question_filter = Filter(
+        lambda file: LC_REGEX.match(file.name) is not None,
+    )
     repo_files = list_files(LEETCODE, filters=[lc_question_filter])
     repo_ids = [get_question_id(file) for file in repo_files]
 
@@ -80,7 +81,7 @@ def get_to_be_removed_files() -> list[Path]:
     return lc_repo_filter(dropbox_files)
 
 
-def move_to_backup(files: list[Path]):
+def move_to_backup(files: list[Path]) -> None:
     for file in files:
         print(f"Moving {file.name} to backup...")
         try:
@@ -89,7 +90,7 @@ def move_to_backup(files: list[Path]):
             print(e)
 
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> Any:
     parser = argparse.ArgumentParser(description="Backup old md files")
     add = parser.add_argument
     add("-d", "--dry-run", action="store_true")
