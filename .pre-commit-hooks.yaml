@@ -3,10 +3,10 @@
   description: Auto-generate README.md for [LeetCode](https://github.com/mortimerliu/LeetCode)
   entry: leetcode-readme
   language: python
-  types: [python]
+  types: [file]
 - id: cleanup-files
   name: cleanup-files
   description: Clean up old md files
   entry: cleanup-files
   language: python
-  types: [python]
+  types: [file]
