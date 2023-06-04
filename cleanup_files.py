@@ -93,6 +93,7 @@ def move_to_backup(files: list[Path]) -> None:
 def main(argv: list[str] | None = None) -> Any:
     parser = argparse.ArgumentParser(description="Backup old md files")
     add = parser.add_argument
+    add("filenames", nargs="*", help="Filenames to check.")
     add("-d", "--dry-run", action="store_true")
     add("-c", "--confirm", action="store_true")
     args = parser.parse_args(argv)
