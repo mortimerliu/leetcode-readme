@@ -108,10 +108,9 @@ def main(argv: list[str] | None = None) -> int:
         confirm = input("Confirm? [y/N] ")
         if confirm.lower() != "y":
             return 3
-    if not args.dry_run:
-        if to_be_removed_files:
-            move_to_backup(to_be_removed_files)
-            return 1
+    if not args.dry_run and to_be_removed_files:
+        move_to_backup(to_be_removed_files)
+        return 1
     return 0
 
 
