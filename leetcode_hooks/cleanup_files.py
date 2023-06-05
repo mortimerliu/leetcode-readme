@@ -90,7 +90,7 @@ def move_to_backup(files: list[Path]) -> None:
             print(e)
 
 
-def main(argv: list[str] | None = None) -> Any:
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Backup old md files")
     add = parser.add_argument
     add("filenames", nargs="*", help="Filenames to check.")
@@ -107,9 +107,12 @@ def main(argv: list[str] | None = None) -> Any:
     if args.confirm:
         confirm = input("Confirm? [y/N] ")
         if confirm.lower() != "y":
-            return
+            return 3
     if not args.dry_run:
-        move_to_backup(to_be_removed_files)
+        if to_be_removed_files:
+            move_to_backup(to_be_removed_files)
+            return 1
+    return 0
 
 
 if __name__ == "__main__":

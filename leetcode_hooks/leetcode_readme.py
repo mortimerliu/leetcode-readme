@@ -6,6 +6,7 @@ import re
 from functools import lru_cache
 from subprocess import CalledProcessError
 from subprocess import check_output
+from typing import Any
 from typing import Iterator
 from typing import Sequence
 
@@ -36,9 +37,11 @@ Will add new problems from weekly and biweekly contests once the contests are ov
 + [Weekly 303](https://leetcode.com/contest/weekly-contest-303)
 """
 
+DirEntry = os.DirEntry[str]
+
 
 class Question:
-    def __init__(self, file: os.DirEntry, level=None):
+    def __init__(self, file: DirEntry, level: str | None = None):
         self.file = file
         self.filename = file.name
         self.id = _extract_question_id(file)
@@ -52,13 +55,13 @@ class Question:
         return hash(self.id)
 
 
-def list_dirs(dir: str | os.DirEntry) -> Iterator[os.DirEntry]:
+def list_dirs(dir: str | DirEntry) -> Iterator[DirEntry]:
     for entry in os.scandir(dir):
         if entry.is_dir():
             yield entry
 
 
-def list_files(dir: str | os.DirEntry) -> Iterator[os.DirEntry]:
+def list_files(dir: str | DirEntry) -> Iterator[DirEntry]:
     for entry in os.scandir(dir):
         if entry.is_file():
             yield entry
@@ -85,7 +88,7 @@ def _name_to_lc_name(name: str) -> str:
     )
 
 
-def _extract_question_level(filepath: str | os.DirEntry) -> str:
+def _extract_question_level(filepath: str | DirEntry) -> str:
     filepath = filepath.path if isinstance(filepath, os.DirEntry) else filepath
     match = re.search(
         r".+/(easy|medium|hard)/\d+\.[0-9a-zA-Z]+\.[a-z]+",
@@ -96,7 +99,7 @@ def _extract_question_level(filepath: str | os.DirEntry) -> str:
     raise ValueError(f"Invalid filepath: {filepath}")
 
 
-def _extract_question_id(filename: str | os.DirEntry) -> int:
+def _extract_question_id(filename: str | DirEntry) -> int:
     filename = filename.name if isinstance(filename, os.DirEntry) else filename
     match = re.search(r"(\d+)\..+", filename)
     if match:
@@ -104,7 +107,7 @@ def _extract_question_id(filename: str | os.DirEntry) -> int:
     raise ValueError(f"Invalid filename: {filename}")
 
 
-def _extract_question_name(filename: str | os.DirEntry) -> str:
+def _extract_question_name(filename: str | DirEntry) -> str:
     filename = filename.name if isinstance(filename, os.DirEntry) else filename
     match = re.search(r"\d+\.([0-9a-zA-Z]+)\..+", filename)
     if match:
@@ -135,13 +138,13 @@ def read_readme(readme: str) -> str:
     return "".join(lines)
 
 
-def write_readme(content: str, readme: str):
+def write_readme(content: str, readme: str) -> Any:
     with open(readme, "w") as f:
         f.write(content)
 
 
 @lru_cache(maxsize=1)
-def root():
+def root() -> str:
     """returns the absolute path of the repository root"""
     try:
         base = check_output("git rev-parse --show-toplevel", shell=True)
