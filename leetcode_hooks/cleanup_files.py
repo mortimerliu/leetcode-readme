@@ -96,11 +96,12 @@ def main(argv: list[str] | None = None) -> int:
     add("filenames", nargs="*", help="Filenames to check.")
     add("-d", "--dry-run", action="store_true")
     add("-c", "--confirm", action="store_true")
+    add("-v", "--verbose", action="store_true")
     args = parser.parse_args(argv)
 
     to_be_removed_files = get_to_be_removed_files()
     to_be_removed_files.sort(key=get_question_id)
-    if args.confirm or args.dry_run:
+    if args.confirm or args.dry_run or args.verbose:
         print("Files to be backed up:")
         for file in to_be_removed_files:
             print("\t" + file.name)
